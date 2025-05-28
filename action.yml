@@ -113,7 +113,7 @@ runs:
       uses: ango-ya/claude-code-base-action@main
       with:
         prompt_file: /tmp/claude-prompts/claude-prompt.txt
-        allowed_tools: ${{ vars.ALLOWED_TOOLS }}
+        allowed_tools: "bash,git"
         disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
         model: ${{ inputs.model || inputs.anthropic_model }}
