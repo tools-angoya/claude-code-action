@@ -113,7 +113,7 @@ runs:
       uses: tools-angoya/claude-code-base-action@main
       with:
         prompt_file: /tmp/claude-prompts/claude-prompt.txt
-        allowed_tools: "bash,git"
+        allowed_tools: ${{ env.ALLOWED_TOOLS }}
         disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
         model: ${{ inputs.model || inputs.anthropic_model }}
