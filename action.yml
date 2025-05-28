@@ -13,70 +13,68 @@ inputs:
     description: "The assignee username that triggers the action (e.g. @claude)"
     required: false
 
-  # Claude Code configuration
   model:
     description: "Model to use (provider-specific format required for Bedrock/Vertex)"
     required: false
   anthropic_model:
-    description: "DEPRECATED: Use 'model' instead. Model to use (provider-specific format required for Bedrock/Vertex)"
+    description: "DEPRECATED: Use 'model' instead."
     required: false
   allowed_tools:
-    description: "Additional tools for Claude to use (the base GitHub tools will always be included)"
+    description: "Additional tools Claude can use"
     required: false
     default: ""
   disallowed_tools:
-    description: "Tools that Claude should never use"
+    description: "Tools Claude should never use"
     required: false
     default: ""
   custom_instructions:
-    description: "Additional custom instructions to include in the prompt for Claude"
+    description: "Additional instructions"
     required: false
     default: ""
   direct_prompt:
-    description: "Direct instruction for Claude (bypasses normal trigger detection)"
+    description: "Direct instruction"
     required: false
     default: ""
 
-  # Auth configuration
   anthropic_api_key:
-    description: "Anthropic API key (required for direct API, not needed for Bedrock/Vertex/OAuth)"
+    description: "Anthropic API key"
     required: false
   github_token:
-    description: "GitHub token with repo and pull request permissions (optional if using GitHub App)"
+    description: "GitHub token"
     required: false
   use_bedrock:
-    description: "Use Amazon Bedrock with OIDC authentication instead of direct Anthropic API"
+    description: "Use Amazon Bedrock"
     required: false
     default: "false"
   use_vertex:
-    description: "Use Google Vertex AI with OIDC authentication instead of direct Anthropic API"
+    description: "Use Vertex AI"
     required: false
     default: "false"
   use_oauth:
-    description: "Use Claude AI OAuth authentication instead of API key (for Claude Max subscribers)"
+    description: "Use Claude OAuth"
     required: false
     default: "false"
   claude_access_token:
-    description: "Claude AI OAuth access token (required when use_oauth is true)"
+    description: "Claude OAuth access token"
     required: false
     default: ""
   claude_refresh_token:
-    description: "Claude AI OAuth refresh token (required when use_oauth is true)"
+    description: "Claude OAuth refresh token"
     required: false
     default: ""
   claude_expires_at:
-    description: "Claude AI OAuth token expiration timestamp (required when use_oauth is true)"
+    description: "Claude OAuth expiration timestamp"
     required: false
     default: ""
 
   timeout_minutes:
-    description: "Timeout in minutes for execution"
+    description: "Execution timeout (minutes)"
     required: false
     default: "30"
 
 outputs:
   execution_file:
-    description: "Path to the Claude Code execution output file"
+    description: "Path to Claude output"
     value: ${{ steps.claude-code.outputs.execution_file }}
 
 runs:
@@ -86,6 +84,18 @@ runs:
       uses: oven-sh/setup-bun@v2
       with:
         bun-version: 1.2.11
+
+    - name: Resolve allowed_tools
+      id: resolve_tools
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.allowed_tools }}" ]; then
+          echo "Using fallback from secrets.ALLOWED_TOOLS"
+          echo "resolved_tools=${{ secrets.ALLOWED_TOOLS }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "Using input allowed_tools"
+          echo "resolved_tools=${{ inputs.allowed_tools }}" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Install Dependencies
       shell: bash
@@ -101,7 +111,7 @@ runs:
       env:
         TRIGGER_PHRASE: ${{ inputs.trigger_phrase }}
         ASSIGNEE_TRIGGER: ${{ inputs.assignee_trigger }}
-        ALLOWED_TOOLS: ${{ inputs.allowed_tools }}
+        ALLOWED_TOOLS: ${{ steps.resolve_tools.outputs.resolved_tools }}
         CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
         DIRECT_PROMPT: ${{ inputs.direct_prompt }}
         OVERRIDE_GITHUB_TOKEN: ${{ inputs.github_token }}
@@ -114,7 +124,7 @@ runs:
       with:
         prompt_file: /tmp/claude-prompts/claude-prompt.txt
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
-        disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
+        disallowed_tools: ${{ inputs.disallowed_tools }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
         model: ${{ inputs.model || inputs.anthropic_model }}
         mcp_config: ${{ steps.prepare.outputs.mcp_config }}
@@ -126,24 +136,20 @@ runs:
         claude_refresh_token: ${{ inputs.claude_refresh_token }}
         claude_expires_at: ${{ inputs.claude_expires_at }}
       env:
-        # Model configuration
         ANTHROPIC_MODEL: ${{ inputs.model || inputs.anthropic_model }}
         GITHUB_TOKEN: ${{ steps.prepare.outputs.GITHUB_TOKEN }}
 
-        # AWS configuration
         AWS_REGION: ${{ env.AWS_REGION }}
         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
         AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
         ANTHROPIC_BEDROCK_BASE_URL: ${{ env.ANTHROPIC_BEDROCK_BASE_URL }}
 
-        # GCP configuration
         ANTHROPIC_VERTEX_PROJECT_ID: ${{ env.ANTHROPIC_VERTEX_PROJECT_ID }}
         CLOUD_ML_REGION: ${{ env.CLOUD_ML_REGION }}
         GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
         ANTHROPIC_VERTEX_BASE_URL: ${{ env.ANTHROPIC_VERTEX_BASE_URL }}
 
-        # Model-specific regions for Vertex
         VERTEX_REGION_CLAUDE_3_5_HAIKU: ${{ env.VERTEX_REGION_CLAUDE_3_5_HAIKU }}
         VERTEX_REGION_CLAUDE_3_5_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_5_SONNET }}
         VERTEX_REGION_CLAUDE_3_7_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_7_SONNET }}
