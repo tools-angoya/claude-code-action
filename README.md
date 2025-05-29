@@ -117,7 +117,7 @@ jobs:
 | `custom_instructions` | Additional custom instructions to include in the prompt for Claude                                                   | No       | ""        |
 | `assignee_trigger`    | The assignee username that triggers the action (e.g. @claude). Only used for issue assignment                        | No       | -         |
 | `trigger_phrase`      | The trigger phrase to look for in comments, issue/PR bodies, and issue titles                                        | No       | `@claude` |
-| `auto_orchestration` | Enable automatic task orchestration and mode delegation for complex tasks                                            | No       | `false`   |
+| `auto_orchestration` | Enable automatic task orchestration and mode delegation for complex tasks                                            | No       | `true`    |
 | `max_subtasks`       | Maximum number of subtasks for auto orchestration                                                                    | No       | `5`       |
 | `orchestration_timeout` | Timeout in minutes for orchestration tasks                                                                        | No       | `45`      |
 

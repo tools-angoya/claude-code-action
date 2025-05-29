@@ -71,7 +71,7 @@ inputs:
   auto_orchestration:
     description: "Enable automatic task orchestration and mode delegation"
     required: false
-    default: "false"
+    default: "true"
   max_subtasks:
     description: "Maximum number of subtasks for auto orchestration"
     required: false
