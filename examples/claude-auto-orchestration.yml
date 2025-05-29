@@ -1,0 +1,55 @@
+name: Claude Assistant with Auto Orchestration
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude-response:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Akira-Papa/claude-code-action@beta
+        with:
+          # Authentication (choose one)
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+          # OAuth authentication for Claude Max subscribers
+          # use_oauth: "true"
+          # claude_access_token: ${{ secrets.CLAUDE_ACCESS_TOKEN }}
+          # claude_refresh_token: ${{ secrets.CLAUDE_REFRESH_TOKEN }}
+          # claude_expires_at: ${{ secrets.CLAUDE_EXPIRES_AT }}
+          
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: "@claude"
+          
+          # Custom instructions for auto orchestration
+          custom_instructions: |
+            自動オーケストレーション機能が有効です。
+            
+            複雑なタスクは自動的に以下のように処理されます：
+            - タスクの複雑度を自動分析
+            - 適切なサブタスクに自動分解
+            - 各サブタスクを最適なモードに委譲
+            - 結果を統合して包括的なソリューションを提供
+            
+            利用可能なモード：
+            - architect: システム設計・アーキテクチャ
+            - code: 実装・コーディング
+            - debug: デバッグ・テスト
+            - ask: 質問回答・説明
+            - orchestrator: 複雑なワークフロー調整
+            
+            手動でモードを指定したい場合は、ブーメランタスクコマンドも使用できます：
+            /architect, /code, /debug, /ask, /orchestrator
+        env:
+          # Enable auto orchestration
+          CLAUDE_AUTO_ORCHESTRATION: "1"
+          
+          # Optional: Configure orchestration behavior
+          # CLAUDE_MAX_SUBTASKS: "5"
+          # CLAUDE_ORCHESTRATION_TIMEOUT: "30"

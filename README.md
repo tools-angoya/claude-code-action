@@ -18,7 +18,9 @@ A general-purpose [Claude Code](https://claude.ai/code) action for GitHub PRs an
 - 💬 **PR/Issue Integration**: Works seamlessly with GitHub comments and PR reviews
 - 🛠️ **Flexible Tool Access**: Access to GitHub APIs and file operations (additional tools can be enabled via configuration)
 - 📋 **Progress Tracking**: Visual progress indicators with checkboxes that dynamically update as Claude completes tasks
-- 🏃 **Runs on Your Infrastructure**: The action executes entirely on your own GitHub runner (Anthropic API calls go to your chosen provider)
+- 🪃 **Boomerang Tasks**: Delegate tasks to specific modes using special commands (e.g., `/architect`, `/debug`, `/ask`)
+- 🎯 **Auto Orchestration**: Automatically analyzes complex tasks and breaks them down into subtasks, delegating to appropriate modes
+- � **Runs on Your Infrastructure**: The action executes entirely on your own GitHub runner (Anthropic API calls go to your chosen provider)
 
 ## Quickstart
 
@@ -115,6 +117,9 @@ jobs:
 | `custom_instructions` | Additional custom instructions to include in the prompt for Claude                                                   | No       | ""        |
 | `assignee_trigger`    | The assignee username that triggers the action (e.g. @claude). Only used for issue assignment                        | No       | -         |
 | `trigger_phrase`      | The trigger phrase to look for in comments, issue/PR bodies, and issue titles                                        | No       | `@claude` |
+| `auto_orchestration` | Enable automatic task orchestration and mode delegation for complex tasks                                            | No       | `false`   |
+| `max_subtasks`       | Maximum number of subtasks for auto orchestration                                                                    | No       | `5`       |
+| `orchestration_timeout` | Timeout in minutes for orchestration tasks                                                                        | No       | `45`      |
 
 \*Required when using direct Anthropic API (default and when not using Bedrock, Vertex, or OAuth)
 
@@ -165,6 +170,69 @@ Upload a screenshot of a bug and ask Claude to fix it:
 ```
 
 Claude can see and analyze images, making it easy to fix visual bugs or UI issues.
+
+#### Boomerang Tasks
+
+Delegate tasks to specific modes using special commands:
+
+```
+/architect システムの全体設計を見直してください
+```
+
+```
+/debug このエラーの原因を特定してください
+```
+
+```
+/ask TypeScriptの最新機能について教えてください
+```
+
+```
+/orchestrator 複数のタスクを調整してください
+```
+
+```
+/code 新しい機能を実装してください
+```
+
+These commands will create a new task instance in the specified mode, allowing for specialized handling of different types of requests.
+
+#### Auto Orchestration
+
+For complex tasks, Claude can automatically analyze your request and break it down into subtasks, delegating each to the most appropriate mode without requiring manual mode specification:
+
+```
+@claude 新しいユーザー認証システムを実装してください
+```
+
+Claude will automatically:
+1. **Analyze** the complexity of the task
+2. **Break down** into subtasks (e.g., design → implementation → testing)
+3. **Delegate** each subtask to the appropriate mode (architect → code → debug)
+4. **Integrate** the results into a comprehensive solution
+
+**Example workflow:**
+- Input: "Create a new user authentication system"
+- Auto-analysis: Complex task detected
+- Subtask 1: `architect` - Design system architecture
+- Subtask 2: `code` - Implement authentication logic
+- Subtask 3: `debug` - Test and debug implementation
+- Output: Complete authentication system with documentation
+
+**Enable Auto Orchestration:**
+Add `CLAUDE_AUTO_ORCHESTRATION=1` to your workflow environment variables:
+
+```yaml
+- uses: Akira-Papa/claude-code-action@beta
+  with:
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+  env:
+    CLAUDE_AUTO_ORCHESTRATION: "1"
+```
+
+**Comparison with Boomerang Tasks:**
+- **Boomerang Tasks**: Manual mode specification (`/architect`, `/debug`, etc.)
+- **Auto Orchestration**: Automatic task analysis and mode delegation
 
 ### Custom Automations
 

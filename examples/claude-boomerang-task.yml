@@ -1,0 +1,33 @@
+name: Claude Assistant with Boomerang Tasks
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude-response:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Akira-Papa/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: "@claude"
+          custom_instructions: |
+            ブーメランタスク機能が有効です。以下のコマンドを使用して特定のモードにタスクを委譲できます：
+            
+            - `/architect [タスク]` - アーキテクチャ設計モードに委譲
+            - `/debug [タスク]` - デバッグモードに委譲  
+            - `/ask [タスク]` - 質問回答モードに委譲
+            - `/orchestrator [タスク]` - オーケストレーターモードに委譲
+            - `/code [タスク]` - コーディングモードに委譲
+            
+            例：
+            - `/architect システムの全体設計を見直してください`
+            - `/debug このエラーの原因を特定してください`
+            - `/ask TypeScriptの最新機能について教えてください`

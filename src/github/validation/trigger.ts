@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
 
 import * as core from "@actions/core";
-import {
-  isIssuesEvent,
-  isIssueCommentEvent,
-  isPullRequestEvent,
-  isPullRequestReviewEvent,
-  isPullRequestReviewCommentEvent,
-} from "../context";
 import type { ParsedGitHubContext } from "../context";
+import {
+  isIssueCommentEvent,
+  isIssuesEvent,
+  isPullRequestEvent,
+  isPullRequestReviewCommentEvent,
+  isPullRequestReviewEvent,
+} from "../context";
 
 export function checkContainsTrigger(context: ParsedGitHubContext): boolean {
   const {
@@ -20,6 +20,15 @@ export function checkContainsTrigger(context: ParsedGitHubContext): boolean {
     console.log(`Direct prompt provided, triggering action`);
     return true;
   }
+
+  // Check for boomerang task patterns
+  const boomerangPatterns = [
+    /\/architect\s+/i,
+    /\/debug\s+/i,
+    /\/ask\s+/i,
+    /\/orchestrator\s+/i,
+    /\/code\s+/i,
+  ];
 
   // Check for assignee trigger
   if (isIssuesEvent(context) && context.eventAction === "assigned") {
@@ -109,8 +118,17 @@ export function checkContainsTrigger(context: ParsedGitHubContext): boolean {
     isPullRequestReviewCommentEvent(context)
   ) {
     const commentBody = isIssueCommentEvent(context)
-      ? context.payload.comment.body
-      : context.payload.comment.body;
+      ? (context as any).payload.comment.body
+      : (context as any).payload.comment.body;
+    
+    // Check for boomerang task patterns first
+    for (const pattern of boomerangPatterns) {
+      if (pattern.test(commentBody)) {
+        console.log(`Comment contains boomerang task pattern: ${pattern}`);
+        return true;
+      }
+    }
+    
     // Check for exact match with word boundaries or punctuation
     const regex = new RegExp(
       `(^|\\s)${escapeRegExp(triggerPhrase)}([\\s.,!?;:]|$)`,
@@ -120,9 +138,6 @@ export function checkContainsTrigger(context: ParsedGitHubContext): boolean {
       return true;
     }
   }
-
-  console.log(`No trigger was met for ${triggerPhrase}`);
-
   return false;
 }
 

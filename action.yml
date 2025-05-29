@@ -68,6 +68,18 @@ inputs:
     description: "Claude AI OAuth token expiration timestamp (required when use_oauth is true)"
     required: false
     default: ""
+  auto_orchestration:
+    description: "Enable automatic task orchestration and mode delegation"
+    required: false
+    default: "false"
+  max_subtasks:
+    description: "Maximum number of subtasks for auto orchestration"
+    required: false
+    default: "5"
+  orchestration_timeout:
+    description: "Timeout in minutes for orchestration tasks"
+    required: false
+    default: "45"
 
   timeout_minutes:
     description: "Timeout in minutes for execution"
@@ -129,6 +141,11 @@ runs:
         # Model configuration
         ANTHROPIC_MODEL: ${{ inputs.model || inputs.anthropic_model }}
         GITHUB_TOKEN: ${{ steps.prepare.outputs.GITHUB_TOKEN }}
+
+        # Auto orchestration configuration
+        CLAUDE_AUTO_ORCHESTRATION: ${{ inputs.auto_orchestration == 'true' && '1' || '0' }}
+        CLAUDE_MAX_SUBTASKS: ${{ inputs.max_subtasks }}
+        CLAUDE_ORCHESTRATION_TIMEOUT: ${{ inputs.orchestration_timeout }}
 
         # AWS configuration
         AWS_REGION: ${{ env.AWS_REGION }}
