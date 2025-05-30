@@ -185,17 +185,6 @@ runs:
         OUTPUT_FILE: ${{ steps.claude-code.outputs.execution_file || '' }}
         TRIGGER_USERNAME: ${{ github.event.comment.user.login || github.event.issue.user.login || github.event.pull_request.user.login || github.event.sender.login || github.triggering_actor || github.actor || '' }}
 
-    - name: Add commit feedback to comment
-      if: steps.prepare.outputs.contains_trigger == 'true' && steps.prepare.outputs.claude_comment_id && steps.claude-code.outputs.conclusion == 'success'
-      shell: bash
-      run: |
-        bun run ${{ github.action_path }}/src/entrypoints/add-commit-feedback.ts
-      env:
-        CLAUDE_COMMENT_ID: ${{ steps.prepare.outputs.claude_comment_id }}
-        BRANCH_NAME: ${{ steps.prepare.outputs.CLAUDE_BRANCH }}
-        GITHUB_TOKEN: ${{ steps.prepare.outputs.GITHUB_TOKEN }}
-        GITHUB_RUN_ID: ${{ github.run_id }}
-
     - name: Display Claude Code Report
       if: steps.prepare.outputs.contains_trigger == 'true' && steps.claude-code.outputs.execution_file != ''
       shell: bash
