@@ -15,6 +15,7 @@ export type CommentUpdateInput = {
   prLink?: string;
   branchName?: string;
   triggerUsername?: string;
+  commitFeedback?: string;
 };
 
 export function ensureProperlyEncodedUrl(url: string): string | null {
@@ -75,6 +76,7 @@ export function updateCommentBody(input: CommentUpdateInput): string {
     actionFailed,
     branchName,
     triggerUsername,
+    commitFeedback,
   } = input;
 
   // Extract content from the original comment body
@@ -189,6 +191,11 @@ export function updateCommentBody(input: CommentUpdateInput): string {
 
   // Add the cleaned body content
   newBody += bodyContent;
+
+  // Add commit feedback if available
+  if (commitFeedback) {
+    newBody += commitFeedback;
+  }
 
   return newBody.trim();
 }
