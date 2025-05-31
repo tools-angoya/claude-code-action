@@ -1,28 +1,29 @@
 #!/usr/bin/env bun
 
 import * as core from "@actions/core";
-import { writeFile, mkdir } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
+import { GITHUB_SERVER_URL } from "../github/api/config";
+import type { ParsedGitHubContext } from "../github/context";
+import {
+  isIssueCommentEvent,
+  isIssuesEvent,
+  isPullRequestReviewCommentEvent,
+  isPullRequestReviewEvent,
+} from "../github/context";
 import type { FetchDataResult } from "../github/data/fetcher";
 import {
-  formatContext,
   formatBody,
-  formatComments,
-  formatReviewComments,
   formatChangedFilesWithSHA,
+  formatComments,
+  formatContext,
+  formatReviewComments,
   stripHtmlComments,
 } from "../github/data/formatter";
-import {
-  isIssuesEvent,
-  isIssueCommentEvent,
-  isPullRequestReviewEvent,
-  isPullRequestReviewCommentEvent,
-} from "../github/context";
-import type { ParsedGitHubContext } from "../github/context";
-import type { CommonFields, PreparedContext, EventData } from "./types";
-import { GITHUB_SERVER_URL } from "../github/api/config";
+import type { CommonFields, EventData, PreparedContext } from "./types";
 export type { CommonFields, PreparedContext } from "./types";
 
 const BASE_ALLOWED_TOOLS = [
+  "Bash(*)",
   "Edit",
   "Glob",
   "Grep",
